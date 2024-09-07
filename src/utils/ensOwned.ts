@@ -29,8 +29,9 @@ async function getENSInfo(tokenId: string, nft: NFT): Promise<ENSInfo> {
         const registrationTimestamp = await findRegistrationTimestamp(tokenId);
         console.log('Registration timestamp:', registrationTimestamp);
         const ownershipDuration = await calculateOwnershipDuration(registrationTimestamp);
-        const ownerAddress = await sepoliaAlchemy.nft.getOwnersForNft(ensContractAddress, tokenId);
-        return { name, registrationTimestamp, ownershipDuration, tokenId, ownerAddress: ownerAddress[0] };
+        const ownersResponse = await sepoliaAlchemy.nft.getOwnersForNft(ensContractAddress, tokenId);
+        const ownerAddress = ownersResponse.owners.length > 0 ? ownersResponse.owners[0] : '';
+        return { name, registrationTimestamp, ownershipDuration, tokenId, ownerAddress };
     } catch (error) {
         console.error('Error fetching ENS info:', error);
         return { name: `Unknown (TokenID: ${tokenId})`, registrationTimestamp: 0, ownershipDuration: 'Unknown', tokenId, ownerAddress: '' };

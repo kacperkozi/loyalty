@@ -8,21 +8,36 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
     return { success: false, message: 'Backend URL is not configured' };
   }
 
+  if (!selectedENS.ownerAddress) {
+    console.error('Owner address is undefined for ENS:', selectedENS.name);
+    return { success: false, message: 'Owner address is undefined' };
+  }
+
   try {
     const response = await fetch(`${backendUrl}/proccess_loyality_check/${selectedENS.ownerAddress}/${selectedENS.name}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       },
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Backend response error:', response.status, errorText);
+      return { success: false, message: `Backend error: ${response.status} ${response.statusText}` };
     }
 
-    const result = await response.json();
-    console.log('Loyalty check result:', result);
-    return { success: true, message: 'Loyalty check successful' };
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      const result = await response.json();
+      console.log('Loyalty check result:', result);
+      return { success: true, message: 'Loyalty check successful' };
+    } else {
+      const text = await response.text();
+      console.error('Unexpected response type:', contentType, text);
+      return { success: false, message: 'Unexpected response from backend' };
+    }
   } catch (error) {
     console.error('Error processing loyalty check:', error);
     return { success: false, message: 'Failed to connect to the backend' };
