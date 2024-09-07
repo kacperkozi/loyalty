@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { getENSNames, ENSInfo as FetchedENSInfo } from '../utils/ensOwned'
 import { toast } from "../hooks/use-toast"
 import { Separator } from '@/components/ui/separator';
+import { Loader2 } from "lucide-react"
 
 import {
   Card,
@@ -37,6 +38,7 @@ export default function Home() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [ensInfo, setEnsInfo] = useState<ENSInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -58,15 +60,17 @@ export default function Home() {
 
   const handleAddressSelect = async (address: string) => {
     setError(null);
+    setIsLoading(true);
     try {
       const names = await getENSNames(address);
       setEnsInfo(names);
     } catch (error) {
       console.error('Error fetching ENS names:', error);
       setError('Error fetching ENS names. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     toast({
@@ -94,41 +98,47 @@ export default function Home() {
               <div>
                 <p className="text-xs">Connected: {walletAddress}</p>
                 <Separator className="my-2" />
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="selectedENS"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3">
-                          <FormLabel className="text-sm">Select an ENS name</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              className="flex flex-col space-y-1"
-                            >
-                              {ensInfo.map((info) => (
-                                <FormItem className="flex items-center space-x-3 space-y-0" key={info.tokenId}>
-                                  <FormControl>
-                                    <RadioGroupItem value={info.name} />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">
-                                    {info.name}
-                                    <FormDescription>
-                                      Owned for: {info.ownershipDuration}
-                                    </FormDescription>
-                                  </FormLabel>
-                                </FormItem>
-                              ))}
-                            </RadioGroup>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit">Confirm Selection</Button>
-                  </form>
-                </Form>
+                {isLoading ? (
+                  <div className="flex justify-center items-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : (
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="selectedENS"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-sm">Select an ENS name</FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-col space-y-1"
+                              >
+                                {ensInfo.map((info) => (
+                                  <FormItem className="flex items-center space-x-3 space-y-0" key={info.tokenId}>
+                                    <FormControl>
+                                      <RadioGroupItem value={info.name} />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {info.name}
+                                      <FormDescription>
+                                        Owned for: {info.ownershipDuration}
+                                      </FormDescription>
+                                    </FormLabel>
+                                  </FormItem>
+                                ))}
+                              </RadioGroup>
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="submit">Confirm Selection</Button>
+                    </form>
+                  </Form>
+                )}
               </div>
             ) : (
               <Button onClick={connectWallet} className="w-full">Connect Wallet</Button>
