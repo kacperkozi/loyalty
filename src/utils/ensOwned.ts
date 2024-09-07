@@ -7,10 +7,14 @@ export interface ENSInfo {
     name: string;
     registrationTimestamp: number;
     ownershipDuration: string;
-    tokenId: string; // Add this line
+    tokenId: string;
 }
 
-async function getENSInfo(tokenId: string, nft: any): Promise<ENSInfo> {
+interface NFT {
+    tokenId: string;
+}
+
+async function getENSInfo(tokenId: string, nft: NFT): Promise<ENSInfo> {
     try {
         const response = await fetch(`https://metadata.ens.domains/sepolia/0x0635513f179D50A207757E05759CbD106d7dFcE8/${tokenId}`);
         if (!response.ok) {
