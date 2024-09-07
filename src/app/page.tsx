@@ -1,16 +1,16 @@
 "use client";
-import Image from "next/image";
-import styles from "./page.module.css";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import styles from "./page.module.css";
+import { getENSNames } from '../utils/ensOwned';
 
 export default function Home() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [ensNames, setEnsNames] = useState<string[]>([]);
 
   const connectWallet = async () => {
     if (typeof window !== 'undefined' && window.ethereum) {
       try {
-        // Request accounts from the wallet
         const provider = new ethers.BrowserProvider(window.ethereum);
         const accounts = await provider.send('eth_requestAccounts', []);
         setWalletAddress(accounts[0]);
@@ -22,12 +22,39 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const fetchENSNames = async () => {
+      if (walletAddress) {
+        try {
+          const names = await getENSNames(walletAddress);
+          setEnsNames(names.filter((name): name is string => name !== undefined));
+        } catch (error) {
+          console.error('Error fetching ENS names:', error);
+        }
+      }
+    };
+
+    fetchENSNames();
+  }, [walletAddress]);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <h1 className={styles.title}>ENS Loyalty</h1>
         {walletAddress ? (
-          <p>Connected: {walletAddress}</p>
+          <div>
+            <p>Connected: {walletAddress}</p>
+            <h2>Your ENS Names:</h2>
+            {ensNames.length > 0 ? (
+              <ul>
+                {ensNames.map((name, index) => (
+                  <li key={index}>{name}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No ENS names found for this wallet.</p>
+            )}
+          </div>
         ) : (
           <button className={styles.walletButton} onClick={connectWallet}>
             Connect Wallet
