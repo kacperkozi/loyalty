@@ -9,16 +9,11 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
   }
 
   try {
-    const response = await fetch(`${backendUrl}/initiate-proof`, {
-      method: 'POST',
+    const response = await fetch(`${backendUrl}/proccess_loyality_check/${selectedENS.ownerAddress}/${selectedENS.name}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        ensName: selectedENS.name,
-        tokenId: selectedENS.tokenId,
-        ownershipDuration: selectedENS.ownershipDuration,
-      }),
     });
 
     if (!response.ok) {
@@ -26,10 +21,10 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
     }
 
     const result = await response.json();
-    console.log('Proof initiation result:', result);
-    return { success: true, message: 'Proof initiation successful' };
+    console.log('Loyalty check result:', result);
+    return { success: true, message: 'Loyalty check successful' };
   } catch (error) {
-    console.error('Error initiating HDP proof:', error);
+    console.error('Error processing loyalty check:', error);
     return { success: false, message: 'Failed to connect to the backend' };
   }
 }

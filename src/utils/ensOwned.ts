@@ -6,6 +6,7 @@ const sepoliaAlchemy = new Alchemy({ apiKey, network: Network.ETH_SEPOLIA });
 export interface ENSInfo {
     name: string;
     registrationTimestamp: number;
+    ownerAddress: string;
     ownershipDuration: string;
     tokenId: string;
 }
@@ -13,6 +14,8 @@ export interface ENSInfo {
 interface NFT {
     tokenId: string;
 }
+
+const ensContractAddress = '0x0635513f179D50A207757E05759CbD106d7dFcE8';
 
 async function getENSInfo(tokenId: string, nft: NFT): Promise<ENSInfo> {
     try {
@@ -26,10 +29,11 @@ async function getENSInfo(tokenId: string, nft: NFT): Promise<ENSInfo> {
         const registrationTimestamp = await findRegistrationTimestamp(tokenId);
         console.log('Registration timestamp:', registrationTimestamp);
         const ownershipDuration = await calculateOwnershipDuration(registrationTimestamp);
-        return { name, registrationTimestamp, ownershipDuration, tokenId };
+        const ownerAddress = await sepoliaAlchemy.nft.getOwnersForNft(ensContractAddress, tokenId);
+        return { name, registrationTimestamp, ownershipDuration, tokenId, ownerAddress: ownerAddress[0] };
     } catch (error) {
         console.error('Error fetching ENS info:', error);
-        return { name: `Unknown (TokenID: ${tokenId})`, registrationTimestamp: 0, ownershipDuration: 'Unknown', tokenId };
+        return { name: `Unknown (TokenID: ${tokenId})`, registrationTimestamp: 0, ownershipDuration: 'Unknown', tokenId, ownerAddress: '' };
     }
 }
 
