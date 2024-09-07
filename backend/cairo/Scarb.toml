@@ -1,0 +1,20 @@
+[package]
+name = "cairo"
+version = "0.1.0"
+edition = "2023_11"
+
+# See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest.html
+
+[dependencies]
+starknet = "2.8.0"
+cairo_lib = { git = "https://github.com/HerodotusDev/cairo-lib.git" }
+hdp_cairo = { git = "https://github.com/HerodotusDev/hdp-cairo.git" }
+
+[dev-dependencies]
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.26.0" }
+
+[[target.starknet-contract]]
+sierra = true
+
+[scripts]
+test = "snforge test"
