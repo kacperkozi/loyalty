@@ -14,6 +14,7 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
   }
 
   try {
+    console.log('Sending request to backend:', `${backendUrl}/proccess_loyality_check/${selectedENS.ownerAddress}/${selectedENS.name}`);
     const response = await fetch(`${backendUrl}/proccess_loyality_check/${selectedENS.ownerAddress}/${selectedENS.name}`, {
       method: 'GET',
       headers: {
