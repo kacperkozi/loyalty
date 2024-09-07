@@ -8,6 +8,7 @@ import { getENSNames, ENSInfo as FetchedENSInfo } from '../utils/ensOwned'
 import { toast } from "../hooks/use-toast"
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from "lucide-react"
+import { requestHdpProof } from '../utils/requestHdpProof';
 
 import {
   Card,
@@ -72,11 +73,45 @@ export default function Home() {
     }
   };
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast({
-      title: "Selected ENS name:",
-      description: data.selectedENS,
-    })
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log("onSubmit function called", data);
+    const selectedENSInfo = ensInfo.find(info => info.name === data.selectedENS);
+    if (selectedENSInfo) {
+      setIsLoading(true);
+      console.log("Selected ENS Info:", selectedENSInfo);
+      try {
+        const { success, message } = await requestHdpProof(selectedENSInfo);
+        console.log("requestHdpProof result:", success, message);
+        if (success) {
+          toast({
+            title: "HDP Proof Initiated",
+            description: `Proof initiated for ${data.selectedENS}`,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: message || "Failed to initiate HDP proof. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error requesting HDP proof:', error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred while requesting the HDP proof.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      console.log("Selected ENS not found in ensInfo:", data.selectedENS, ensInfo);
+      toast({
+        title: "Error",
+        description: "Selected ENS not found. Please try again.",
+        variant: "destructive",
+      });
+    }
   }
 
   useEffect(() => {
@@ -135,7 +170,20 @@ export default function Home() {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit">Confirm Selection</Button>
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading || !form.formState.isValid}
+                        onClick={() => console.log("Button clicked", form.getValues())}  // Add this line
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Initiating Proof...
+                          </>
+                        ) : (
+                          "Confirm Selection"
+                        )}
+                      </Button>
                     </form>
                   </Form>
                 )}
