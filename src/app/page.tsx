@@ -6,14 +6,12 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { getENSNames, ENSInfo as FetchedENSInfo } from '../utils/ensOwned'
 import { toast } from "../hooks/use-toast"
-import styles from "./page.module.css";
 import { Separator } from '@/components/ui/separator';
 
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -89,7 +87,7 @@ export default function Home() {
         <Card className="w-[350px] px-4">
           <CardHeader>
             <CardTitle className="text-lg font-bold text-center">ENS Loyalty</CardTitle>
-            <CardDescription className="text-center text-sm">Check your ENS names and prove how long you've owned them.</CardDescription>
+            <CardDescription className="text-center text-sm">Check your ENS names and prove how long you&apos;ve owned them.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {walletAddress ? (

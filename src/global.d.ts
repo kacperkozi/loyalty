@@ -1,4 +1,10 @@
 interface Window {
-    ethereum?: any;
-  }
-  
+    ethereum?: {
+        isMetaMask?: boolean;
+        request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    };
+}
+
+interface NFT {
+    tokenId: string;
+}
