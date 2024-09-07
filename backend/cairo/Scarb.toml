@@ -7,7 +7,7 @@ edition = "2023_11"
 
 [dependencies]
 starknet = "2.8.0"
-cairo_lib = { git = "https://github.com/HerodotusDev/cairo-lib.git" }
+#cairo_lib = { git = "https://github.com/HerodotusDev/cairo-lib.git" }
 hdp_cairo = { git = "https://github.com/HerodotusDev/hdp-cairo.git" }
 
 [dev-dependencies]
@@ -15,6 +15,10 @@ snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v
 
 [[target.starknet-contract]]
 sierra = true
+casm = true
+casm-add-pythonic-hints = true
 
 [scripts]
 test = "snforge test"
+
+

@@ -2,7 +2,7 @@
 
 .env
 backend/.env
-
+backend/node_modules
 # dependencies
 /node_modules
 /.pnp

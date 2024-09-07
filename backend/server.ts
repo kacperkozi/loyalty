@@ -10,9 +10,9 @@ import {
 } from "viem";
 //import { namehash,  } from '@ensdomains/ensjs/utils';
 
-//import { eq, inArray, and, or, sql } from "drizzle-orm";
-//import { DatabaseConnection } from "database";
-
+import { eq, inArray, and, or, sql } from "drizzle-orm";
+import { DatabaseConnection } from "./database";
+import { RequestStore } from "./database/schema";
 import {} from "viem";
 
 import { env } from "bun";
@@ -30,6 +30,9 @@ const ENS_BASE_REGISTRAR_CONTRACT_ADDRESS =
   "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85";
 const ENS_OLD_REGISTRAR_CONTRACT_ADDRESS =
   "0x283af0b28c62c092c9727f1ee09c02ca627eb7f5";
+
+const ENS_BASE_REGISTRAR_CONTRACT_ADDRESS_SEPOLIA =
+  "0x0635513f179d50a207757e05759cbd106d7dfce8";
 
 export default class MyEtherscanProvider extends EtherscanProvider {
   constructor(networkish: Networkish, apiKey?: string) {
@@ -105,15 +108,24 @@ app.get(
 );
 
 app.get("/request_status/:domain_name", async (req: Request, res: Response) => {
+  const domain_name = req.params.domain_name;
   const { db } = DatabaseConnection.get();
 
-  res.json(request);
+  const requestStatus = await db
+    .select()
+    .from(RequestStore)
+    .where(eq(RequestStore.domain_name, domain_name))
+    //.limit(12)
+    .execute();
+
+  res.json(requestStatus);
 });
 
 app.get(
   //app.post(
   "/proccess_loyality_check/:owner_address/:domain_name",
   async (req: Request, res: Response) => {
+    const { db } = DatabaseConnection.get();
     //const { db } = DatabaseConnection.get();
 
     const domain_owner_address = req.params.owner_address;
@@ -125,7 +137,7 @@ app.get(
 
     // 1 Step: List all transactions of user address
     const myEtherScanInstance = new MyEtherscanProvider(
-      "mainnet",
+      "sepolia", // "mainnet",
       ETHERSCAN_API_KEY,
     );
     const accountTransactions =
@@ -172,29 +184,41 @@ app.get(
         transaction.from.toLowerCase() == domain_owner_address.toLowerCase()
       ) {
         hdpComputeCounts++;
+        // if (
+        //   transaction.to.toLowerCase() ==
+        //   ENS_BASE_REGISTRAR_CONTRACT_ADDRESS.toLowerCase()
+        // ) {
+        //   console.log(
+        //     `Detected ENS related transaction to BASE registrar at position ${transaction.nonce} in block ${transaction.blockNumber}`,
+        //   );
+        //   blockNumbersToCheck.push(transaction.blockNumber);
+        //   console.log(`HDP query #${hdpComputeCounts}:
+        //     Determine if at the contract ${ENS_BASE_REGISTRAR_CONTRACT_ADDRESS} at block ${transaction.blockNumber} at storage slot ${storageSlot} the stored value was ${domain_owner_address} which is the address of domain owner`);
+        // }
+
+        // if (
+        //   transaction.to.toLowerCase() ==
+        //   ENS_OLD_REGISTRAR_CONTRACT_ADDRESS.toLowerCase()
+        // ) {
+        //   hdpComputeCounts++;
+        //   console.log(
+        //     `Detected ENS related transaction to OLD registrar at position ${transaction.nonce} in block ${transaction.blockNumber}`,
+        //   );
+        //   blockNumbersToCheck.push(transaction.blockNumber);
+        //   console.log(`HDP query #${hdpComputeCounts}:
+        //     Determine if at the contract ${ENS_OLD_REGISTRAR_CONTRACT_ADDRESS}  at block ${transaction.blockNumber} at storage slot ${storageSlot} the stored value was ${domain_owner_address} which is the address of domain owner`);
+        // }
+
         if (
           transaction.to.toLowerCase() ==
-          ENS_BASE_REGISTRAR_CONTRACT_ADDRESS.toLowerCase()
+          ENS_BASE_REGISTRAR_CONTRACT_ADDRESS_SEPOLIA.toLowerCase()
         ) {
           console.log(
             `Detected ENS related transaction to BASE registrar at position ${transaction.nonce} in block ${transaction.blockNumber}`,
           );
           blockNumbersToCheck.push(transaction.blockNumber);
           console.log(`HDP query #${hdpComputeCounts}:
-            Determine if at the contract ${ENS_BASE_REGISTRAR_CONTRACT_ADDRESS} at block ${transaction.blockNumber} at storage slot ${storageSlot} the stored value was ${domain_owner_address} which is the address of domain owner`);
-        }
-
-        if (
-          transaction.to.toLowerCase() ==
-          ENS_OLD_REGISTRAR_CONTRACT_ADDRESS.toLowerCase()
-        ) {
-          hdpComputeCounts++;
-          console.log(
-            `Detected ENS related transaction to OLD registrar at position ${transaction.nonce} in block ${transaction.blockNumber}`,
-          );
-          blockNumbersToCheck.push(transaction.blockNumber);
-          console.log(`HDP query #${hdpComputeCounts}:
-            Determine if at the contract ${ENS_OLD_REGISTRAR_CONTRACT_ADDRESS}  at block ${transaction.blockNumber} at storage slot ${storageSlot} the stored value was ${domain_owner_address} which is the address of domain owner`);
+            Determine if at the contract ${ENS_BASE_REGISTRAR_CONTRACT_ADDRESS_SEPOLIA} at block ${transaction.blockNumber} at storage slot ${storageSlot} the stored value was ${domain_owner_address} which is the address of domain owner`);
         }
       }
     }
@@ -202,6 +226,27 @@ app.get(
     console.log(
       `Block numbers need to be checked by HDP: ${blockNumbersToCheck}`,
     );
+
+    const requestDataObj = {
+      domain_name: domain_name,
+      domain_owner_address: domain_owner_address,
+      status: "STARTED_GENERATING_PROOFS",
+    };
+
+    const [existingRequestData] = await db
+    .select()
+    .from(RequestStore)
+    .where(eq(RequestStore.domain_name, domain_name))
+    .execute();
+
+  if (!existingRequestData || !existingRequestData.domain_name) {
+    const [requestData] = await db
+      .insert(RequestStore)
+      .values(requestDataObj)
+      .returning();
+  } else {
+    console.log("Request already exists");
+  }
 
     // HDP check to be done
 
@@ -219,6 +264,9 @@ app.get(
     });
   },
 );
+
+
+/// When we finish the hdp proving and computation we change the state of request in the database
 
 app.post("/webhook", async (req: Request, res: Response) => {
   await handleWebhook(req, res);

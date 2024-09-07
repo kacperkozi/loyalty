@@ -5,15 +5,9 @@ version = 1
 name = "cairo"
 version = "0.1.0"
 dependencies = [
- "cairo_lib",
  "hdp_cairo",
  "snforge_std",
 ]
-
-[[package]]
-name = "cairo_lib"
-version = "0.2.0"
-source = "git+https://github.com/HerodotusDev/cairo-lib.git#a0c0ee4feeb4edb61e7a35d29595ad8647c3d469"
 
 [[package]]
 name = "hdp_cairo"
