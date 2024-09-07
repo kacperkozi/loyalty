@@ -56,7 +56,7 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
 
             // Check HDP request status
             let isReady = false;
-            for (let i = 0; i < 5; i++) {  // Try up to 5 times
+            for (let i = 0; i < 1000; i++) {  // Try up to 5 times
                 isReady = await checkHdpRequestStatus(selectedENS.name);
                 if (isReady) break;
                 await new Promise(resolve => setTimeout(resolve, 5000));  // Wait 5 seconds before checking again
