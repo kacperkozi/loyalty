@@ -1,6 +1,6 @@
 import { ENSInfo } from './ensOwned';
 
-async function checkHdpRequestStatus(domainName: string): Promise<boolean> {
+async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boolean; status: string }> {
     try {
         const response = await fetch(`${process.env.BACKEND_URL}/request_status/${domainName}`, {
             method: 'GET',
@@ -14,14 +14,32 @@ async function checkHdpRequestStatus(domainName: string): Promise<boolean> {
         }
 
         const result = await response.json();
-        return result.ready === true;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Backend response error:', response.status, errorText);
+           // return { success: false, message: `Backend error: ${response.status} ${response.statusText}` };
+        }
+       // const responseText = await response.text();
+        //console.log('Response text:', responseText);
+
+        const responseJSON = result;//JSON.parse(responseText);
+        console.log('Response JSON:', responseJSON);
+
+        if (responseJSON[0].status === 'PROOF_DONE') {
+            return { ready: true, status: responseJSON[0].status };
+            //return { success: true, message: 'Loyalty check successful and HDP proof is ready', status: responseJSON.status };
+        } else {
+            return { ready: false, status: responseJSON[0].status };
+            //return { success: false, message: 'HDP proof is not ready yet. Please try again later.', status: responseJSON.status };
+        }
+        
     } catch (error) {
         console.error('Error checking HDP request status:', error);
-        return false;
+        return { ready: false, status: '' };
     }
 }
 
-export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: boolean; message: string }> {
+export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: boolean; message: string; status?: string }> {
     const backendUrl = process.env.BACKEND_URL;
 
     if (!backendUrl) {
@@ -56,16 +74,22 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
 
             // Check HDP request status
             let isReady = false;
-            for (let i = 0; i < 1000; i++) {  // Try up to 5 times
-                isReady = await checkHdpRequestStatus(selectedENS.name);
+            let status = '';
+            for (let i = 0; i < 1000; i++) {
+                const statusResult = await checkHdpRequestStatus(selectedENS.name);
+                console.log(`Status check ${i + 1}:`, statusResult);
+                isReady = statusResult.ready;
+                status = statusResult.status;
                 if (isReady) break;
-                await new Promise(resolve => setTimeout(resolve, 5000));  // Wait 5 seconds before checking again
+                await new Promise(resolve => setTimeout(resolve, 5000));
             }
 
-            if (isReady) {
-                return { success: true, message: 'Loyalty check successful and HDP proof is ready' };
+            console.log('Final status:', { isReady, status });
+
+            if (isReady && status === 'PROOF_DONE') {
+                return { success: true, message: 'Loyalty check successful and HDP proof is ready', status };
             } else {
-                return { success: false, message: 'HDP proof is not ready yet. Please try again later.' };
+                return { success: false, message: 'HDP proof is not ready yet. Please try again later.', status };
             }
         } else {
             const text = await response.text();
@@ -73,7 +97,7 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
             return { success: false, message: 'Unexpected response from backend' };
         }
     } catch (error) {
-        console.error('Error processing loyalty check:', error);
-        return { success: false, message: 'Failed to connect to the backend' };
+        console.error('Error in requestHdpProof:', error);
+        return { success: false, message: 'Failed to connect to the backend', status: 'ERROR' };
     }
 }
