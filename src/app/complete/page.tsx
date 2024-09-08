@@ -14,7 +14,7 @@ export default function CompletePage() {
         <div className="flex flex-col items-center space-y-4">
           <CheckCircle className="w-16 h-16 text-green-500" />
           <h1 className="text-2xl font-bold">Proving Complete</h1>
-          
+          <p> Proving of your ENS ownership is complete and an NFT serving as a proof of your long-term ownership has been minted.</p>
           {/* NFT Image */}
           <div className="mt-4">
             <Image src={nftImageUrl} alt="1 Year Ownership NFT" width={200} height={200} className="rounded-lg" />
@@ -23,7 +23,7 @@ export default function CompletePage() {
           {/* Transaction Hash */}
           <div className="mt-2 text-sm text-gray-600">
             <p>Transaction Hash:</p>
-            <p className="font-mono break-all">{txHash}</p>
+            <a href={`https://sepolia-optimism.etherscan.io/tx/${txHash}`} className="font-mono break-all">{txHash}</a>
           </div>
         </div>
       </Card>
