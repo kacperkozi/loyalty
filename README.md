@@ -1,36 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ENS Loyalty
 
-## Getting Started
+This project demonstrates an MVP system for proving continuous ownership of Ethereum Name Service (ENS) domains. It allows users to cryptographically verify how long they've owned their ENS names and mint an NFT as a proof of ownership for the duration of their ownership.
 
-First, run the development server:
+How It Works
+1. Wallet Connection: Users connect their Ethereum wallet to the application.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. ENS Name Retrieval: The system fetches all ENS names owned by the connected wallet address.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Ownership Duration Calculation: For each ENS name, the application calculates the duration of ownership by analyzing historical onchain data.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. HDP (Herodotus Data Processor) Proof: The system initiates a proof generation process using HDP to cryptographically verify the continuous ownership of the ENS name.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. Loyalty Verification: Once the proof is generated, users can demonstrate their long-term commitment to their ENS names thanks to the minted NFT showcasing the duration of ownership.
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js
+- Tailwind CSS
+- Solidity
+- Ethereum
+- HDP
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is an ETHWarsaw 2024 hackathon project.
