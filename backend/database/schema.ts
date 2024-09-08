@@ -13,4 +13,5 @@ export const RequestStore = pgTable("request_store", {
   domain_name: varchar("key", { length: 128 }).unique(),
   status: text("value"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  nft_mint_transaction_hash: text("nft_mint_transaction_hash"),
 });

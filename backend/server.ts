@@ -13,6 +13,12 @@ import {
 import { eq, inArray, and, or, sql } from "drizzle-orm";
 import { DatabaseConnection } from "./database";
 import { RequestStore } from "./database/schema";
+
+import { mintNFT } from "./contracts/scripts/mint-nft";
+
+
+import { mint } from "co";
+
 import {} from "viem";
 
 import { env } from "bun";
@@ -22,7 +28,7 @@ import cors from "cors";
 const app = express();
 const port = 3000;
 
-import { EtherscanProvider, Networkish, BlockTag } from "ethers"; //^v6
+import { EtherscanProvider, Networkish, BlockTag, N } from "ethers"; //^v6
 
 const ETHERSCAN_API_KEY = env.ETHERSCAN_API_KEY;
 
@@ -255,6 +261,14 @@ app.get(
     // 6 Step: Check all HDP proofs onchain
 
     // 7 Step: Send appropriate NFT mintong transaction on Optimism sepolia
+    let loyalYears = 1;
+    const transactionHash = await mintNFT(loyalYears);
+
+    await db
+    .update(RequestStore)
+    .set({ status: "PROOF_DONE", nft_mint_transaction_hash: transactionHash })
+    .where(eq(RequestStore.domain_name, domain_name))
+    .execute();
 
     return res.json({
       success: true,
