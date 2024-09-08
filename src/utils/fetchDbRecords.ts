@@ -1,6 +1,6 @@
 export async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boolean; status: string; nft_mint_transaction_hash?: string }> {
     try {
-        const response = await fetch(`${process.env.BACKEND_URL}/get_all_requests`, {
+        const response = await fetch(`${process.env.BACKEND_URL}/get_all_done_requests`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
