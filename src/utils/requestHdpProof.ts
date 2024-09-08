@@ -1,6 +1,6 @@
 import { ENSInfo } from './ensOwned';
 
-async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boolean; status: string }> {
+async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boolean; status: string; nft_mint_transaction_hash?: string }> {
     try {
         const response = await fetch(`${process.env.BACKEND_URL}/request_status/${domainName}`, {
             method: 'GET',
@@ -26,10 +26,18 @@ async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boole
         console.log('Response JSON:', responseJSON);
 
         if (responseJSON[0].status === 'PROOF_DONE') {
-            return { ready: true, status: responseJSON[0].status };
+            return { 
+                ready: true, 
+                status: responseJSON[0].status, 
+                nft_mint_transaction_hash: responseJSON[0].nft_mint_transaction_hash
+            };
             //return { success: true, message: 'Loyalty check successful and HDP proof is ready', status: responseJSON.status };
         } else {
-            return { ready: false, status: responseJSON[0].status };
+            return { 
+                ready: false, 
+                status: responseJSON[0].status, 
+                nft_mint_transaction_hash: responseJSON[0].nft_mint_transaction_hash
+            };
             //return { success: false, message: 'HDP proof is not ready yet. Please try again later.', status: responseJSON.status };
         }
         
@@ -39,7 +47,7 @@ async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boole
     }
 }
 
-export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: boolean; message: string; status?: string }> {
+export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: boolean; message: string; status?: string; nft_mint_transaction_hash?: string }> {
     const backendUrl = process.env.BACKEND_URL;
 
     if (!backendUrl) {
@@ -75,19 +83,21 @@ export async function requestHdpProof(selectedENS: ENSInfo): Promise<{ success: 
             // Check HDP request status
             let isReady = false;
             let status = '';
+            let txHash = '';
             for (let i = 0; i < 1000; i++) {
                 const statusResult = await checkHdpRequestStatus(selectedENS.name);
                 console.log(`Status check ${i + 1}:`, statusResult);
                 isReady = statusResult.ready;
                 status = statusResult.status;
+                txHash = statusResult.nft_mint_transaction_hash || '';
                 if (isReady) break;
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
 
-            console.log('Final status:', { isReady, status });
+            console.log('Final status:', { isReady, status, txHash });
 
             if (isReady && status === 'PROOF_DONE') {
-                return { success: true, message: 'Loyalty check successful and HDP proof is ready', status };
+                return { success: true, message: 'Loyalty check successful and HDP proof is ready', status, nft_mint_transaction_hash: txHash };
             } else {
                 return { success: false, message: 'HDP proof is not ready yet. Please try again later.', status };
             }

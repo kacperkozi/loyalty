@@ -36,6 +36,13 @@ const FormSchema = z.object({
   selectedENS: z.string(),
 })
 
+type ProofResult = {
+  success: boolean;
+  message: string;
+  status?: string;
+  nft_mint_transaction_hash?: string;
+};
+
 export default function Home() {
   const router = useRouter();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -82,11 +89,16 @@ export default function Home() {
       setIsLoading(true);
       console.log("Selected ENS Info:", selectedENSInfo);
       try {
-        const result = await requestHdpProof(selectedENSInfo);
+        const result: ProofResult = await requestHdpProof(selectedENSInfo);
         if (result.success && result.status === 'PROOF_DONE') {
-          router.push('/complete');
+          router.push(`/complete?txHash=${result.nft_mint_transaction_hash}`);
         } else {
           console.error('Proof not ready:', result.message);
+          toast({
+            title: "Proof Not Ready",
+            description: result.message,
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error('Error requesting HDP proof:', error);
