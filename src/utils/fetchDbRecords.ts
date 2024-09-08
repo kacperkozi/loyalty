@@ -1,4 +1,4 @@
-async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boolean; status: string; nft_mint_transaction_hash?: string }> {
+export async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boolean; status: string; nft_mint_transaction_hash?: string }> {
     try {
         const response = await fetch(`${process.env.BACKEND_URL}/get_all_requests`, {
             method: 'GET',
@@ -21,7 +21,13 @@ async function checkHdpRequestStatus(domainName: string): Promise<{ ready: boole
         console.log('Response JSON:', responseJSON);
 
         // Assuming the response contains an array of requests
-        const request = responseJSON.find((req: any) => req.domain_name === domainName);
+        interface RequestStatus {
+            domain_name: string;
+            status: string;
+            nft_mint_transaction_hash?: string;
+        }
+
+        const request = responseJSON.find((req: RequestStatus) => req.domain_name === domainName);
 
         if (request) {
             return {
