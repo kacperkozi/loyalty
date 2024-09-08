@@ -9,6 +9,7 @@ import { toast } from "../hooks/use-toast"
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from "lucide-react"
 import { requestHdpProof } from '../utils/requestHdpProof';
+import { useRouter } from 'next/navigation';
 
 import {
   Card,
@@ -36,6 +37,7 @@ const FormSchema = z.object({
 })
 
 export default function Home() {
+  const router = useRouter();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [ensInfo, setEnsInfo] = useState<ENSInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -73,26 +75,18 @@ export default function Home() {
     }
   };
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     console.log("onSubmit function called", data);
     const selectedENSInfo = ensInfo.find(info => info.name === data.selectedENS);
     if (selectedENSInfo) {
       setIsLoading(true);
       console.log("Selected ENS Info:", selectedENSInfo);
       try {
-        const { success, message } = await requestHdpProof(selectedENSInfo);
-        console.log("requestHdpProof result:", success, message);
-        if (success) {
-          toast({
-            title: "HDP Proof Initiated",
-            description: `Proof initiated for ${data.selectedENS}`,
-          });
+        const result = await requestHdpProof(selectedENSInfo);
+        if (result.success && result.status === 'PROOF_DONE') {
+          router.push('/complete');
         } else {
-          toast({
-            title: "Error",
-            description: message || "Failed to initiate HDP proof. Please try again.",
-            variant: "destructive",
-          });
+          console.error('Proof not ready:', result.message);
         }
       } catch (error) {
         console.error('Error requesting HDP proof:', error);
@@ -112,7 +106,7 @@ export default function Home() {
         variant: "destructive",
       });
     }
-  }
+  };
 
   useEffect(() => {
     if (walletAddress) {
