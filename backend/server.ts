@@ -116,6 +116,28 @@ app.get(
   },
 );
 
+app.get(
+  "/get_all_requests",
+  async (req: Request, res: Response) => {
+    const { db } = DatabaseConnection.get();
+
+    const requests = await db.select().from(RequestStore).execute();
+
+    res.json(requests);
+  },
+);
+
+app.get(
+  "/get_all_done_requests",
+  async (req: Request, res: Response) => {
+    const { db } = DatabaseConnection.get();
+
+    const requests = await db.select().from(RequestStore).where(eq(RequestStore.status, "PROOF_DONE")).execute();
+
+    res.json(requests);
+  },
+);
+
 app.get("/request_status/:domain_name", async (req: Request, res: Response) => {
   const domain_name = req.params.domain_name;
   const { db } = DatabaseConnection.get();
@@ -281,6 +303,37 @@ app.get(
     // });
 
     //http://program-registery.api.herodotus.cloud
+
+    // Construct and send HDP batch query
+    const responseFromHDP = await fetch(
+      `${process.env.HDP_URL}/submit-batch-query?apiKey=${env.HDP_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          {
+            "destinationChainId":11155111,
+            "tasks": [
+                        {
+                          "type": "Module",
+                          "programHash": env.HDP_PROGRAM_HASH,
+                          "inputs": [
+                            "0x3",
+                             ...blockNumbersToCheck.map(num => "0x" + num.toString(16).padStart(8, '0'))
+                            , ENS_BASE_REGISTRAR_CONTRACT_ADDRESS_SEPOLIA, storageSlot
+                          ]
+                        }
+              ]
+          }
+        ),
+      },
+    );
+
+    const responseFromHDPJson = await responseFromHDP.json();
+    console.log("Response from HDP: ", responseFromHDPJson);
+
 
     // 5 Step: Send queries to HDP and wait for reply
 
