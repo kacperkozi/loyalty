@@ -19,25 +19,31 @@ import {
 } from "@/components/ui/card";
 
 interface LeaderboardEntry {
-  rank: number;
-  name: string;
-  duration: string;
-  score: number;
+  id: number;
+  domain_name: string;
+  status: string;
+  updatedAt: string;
+  nft_mint_transaction_hash: string | null;
 }
 
 export default function LeaderboardPage() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
-    // Mock data fetching
-    const mockData: LeaderboardEntry[] = [
-      { rank: 1, name: "kozi.eth", duration: "2 years", score: 1000 },
-      { rank: 2, name: "vitalik.eth", duration: "5 years", score: 950 },
-      { rank: 3, name: "nick.eth", duration: "4 years", score: 900 },
-      { rank: 4, name: "taylor.eth", duration: "3 years", score: 850 },
-      { rank: 5, name: "ens.eth", duration: "6 years", score: 800 },
-    ];
-    setLeaderboardData(mockData);
+    const fetchLeaderboardData = async () => {
+      try {
+        const response = await fetch(`${process.env.BACKEND_URL}/get_all_requests`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch leaderboard data');
+        }
+        const data = await response.json();
+        setLeaderboardData(data);
+      } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+      }
+    };
+
+    fetchLeaderboardData();
   }, []);
 
   return (
@@ -45,24 +51,39 @@ export default function LeaderboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>ENS Loyalty Leaderboard</CardTitle>
-          <CardDescription>Top performers in ENS name ownership duration</CardDescription>
+          <CardDescription>Current standings in the ENS Loyalty program</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
-            <TableCaption>Current standings in the ENS Loyalty program</TableCaption>
+            <TableCaption>ENS Loyalty Leaderboard</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Rank</TableHead>
-                <TableHead>ENS Name</TableHead>
-                <TableHead>Ownership Duration</TableHead>
+                <TableHead className="w-[100px]">Domain Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Last Updated</TableHead>
+                <TableHead>NFT Transaction</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {leaderboardData.map((entry) => (
-                <TableRow key={entry.rank}>
-                  <TableCell className="font-medium">{entry.rank}</TableCell>
-                  <TableCell>{entry.name}</TableCell>
-                  <TableCell>{entry.duration}</TableCell>
+                <TableRow key={entry.id}>
+                  <TableCell className="font-medium">{entry.domain_name}</TableCell>
+                  <TableCell>{entry.status}</TableCell>
+                  <TableCell>{new Date(entry.updatedAt).toLocaleString()}</TableCell>
+                  <TableCell>
+                    {entry.nft_mint_transaction_hash ? (
+                      <a
+                        href={`https://sepolia-optimism.etherscan.io/tx/${entry.nft_mint_transaction_hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        View Transaction
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
