@@ -3,7 +3,7 @@ import { CheckCircle } from "lucide-react"
 import Image from "next/image"
 
 const nftImageUrl = "https://mzgreh7dxqq3s7mix2pfwkco3beetb6upgzxkonr3suk55phikxa.arweave.net/Zk0SH-O8Ibl9iL6eWyhO2EhJh9R5s3U5sdyorvXnQq4"
-const txHash = "0x1234...abcd"
+const txHash = "0x2c3e...ab5d"
 
 export default function CompletePage() {
   return (
