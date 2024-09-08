@@ -8,7 +8,10 @@ edition = "2023_11"
 [dependencies]
 starknet = "2.8.0"
 #cairo_lib = { git = "https://github.com/HerodotusDev/cairo-lib.git" }
-hdp_cairo = { git = "https://github.com/HerodotusDev/hdp-cairo.git", commit = "1632830e821d77dfcc57452c0682ca312fc74b36" }
+#hdp_cairo = { git = "https://github.com/HerodotusDev/hdp-cairo.git", commit = "1632830e821d77dfcc57452c0682ca312fc74b36" }
+hdp_cairo = { git = "https://github.com/HerodotusDev/hdp-cairo.git", rev = "1632830" }
+
+
 
 [dev-dependencies]
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.26.0" }

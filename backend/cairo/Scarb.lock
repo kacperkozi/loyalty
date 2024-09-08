@@ -12,7 +12,7 @@ dependencies = [
 [[package]]
 name = "hdp_cairo"
 version = "0.1.0"
-source = "git+https://github.com/HerodotusDev/hdp-cairo.git#9b3e80341c305b3c5984d0636a92b5b50bb0495f"
+source = "git+https://github.com/HerodotusDev/hdp-cairo.git?rev=1632830#1632830e821d77dfcc57452c0682ca312fc74b36"
 
 [[package]]
 name = "snforge_std"
