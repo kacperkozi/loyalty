@@ -55,7 +55,6 @@ export default function LeaderboardPage() {
                 <TableHead className="w-[100px]">Rank</TableHead>
                 <TableHead>ENS Name</TableHead>
                 <TableHead>Ownership Duration</TableHead>
-                <TableHead className="text-right">Loyalty Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,7 +63,6 @@ export default function LeaderboardPage() {
                   <TableCell className="font-medium">{entry.rank}</TableCell>
                   <TableCell>{entry.name}</TableCell>
                   <TableCell>{entry.duration}</TableCell>
-                  <TableCell className="text-right">{entry.score}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
