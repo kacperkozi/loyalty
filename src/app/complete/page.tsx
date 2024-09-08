@@ -2,8 +2,6 @@ import { Card } from "@/components/ui/card"
 import { CheckCircle } from "lucide-react"
 import Image from "next/image"
 
-// Assuming you have a way to get the NFT data and txHash
-// You might want to replace these with actual data fetching logic
 const nftImageUrl = "https://mzgreh7dxqq3s7mix2pfwkco3beetb6upgzxkonr3suk55phikxa.arweave.net/Zk0SH-O8Ibl9iL6eWyhO2EhJh9R5s3U5sdyorvXnQq4"
 const txHash = "0x1234...abcd"
 
