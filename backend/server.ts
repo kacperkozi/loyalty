@@ -16,8 +16,11 @@ import { RequestStore } from "./database/schema";
 
 import { mintNFT } from "./contracts/scripts/mint-nft";
 
+import axios from 'axios';
+import * as fs from 'fs';
+import FormData from 'form-data';
 
-import { mint } from "co";
+//import { mint } from "./con";
 
 import {} from "viem";
 
@@ -255,6 +258,29 @@ app.get(
   }
 
     // HDP check to be done
+
+    // // Sned compiled cairo to program registry
+    // // Path to your file
+    // const compiledCairoModulefilePath = 'cairo/target/dev/cairo_contract.compiled_contract_class.json';
+
+    // // Create form data
+    // const formData = new FormData();
+    // formData.append('program', fs.createReadStream(compiledCairoModulefilePath));
+
+    // // Send the POST request
+    // axios.post('http://program-registery.api.herodotus.cloud/upload-program', formData, {
+    //     headers: {
+    //         ...formData.getHeaders()
+    //     }
+    // })
+    // .then(response => {
+    //     console.log('Compiled Cairo File uploaded successfully:', response.data);
+    // })
+    // .catch(error => {
+    //     console.error('Compiled Cairo File Error uploading file:', error);
+    // });
+
+    //http://program-registery.api.herodotus.cloud
 
     // 5 Step: Send queries to HDP and wait for reply
 
